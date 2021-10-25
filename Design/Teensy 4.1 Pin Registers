@@ -1,3 +1,5 @@
+Communication Protocol = CP
+
 GPIO6_DR
 Bits    Pin
 00
@@ -16,14 +18,14 @@ Bits    Pin
 13      25
 14
 15
-16      19
-17      18
-18      14
-19      15
-20      40
-21      41
-22      17
-23      16
+16      19  Up Button
+17      18  Down Button
+18      14  Left Button
+19      15  Right Button
+20      40  A Button
+21      41  B Button
+22      17  X Button
+23      16  Y Button
 24      22
 25      23
 26      20
@@ -115,11 +117,11 @@ Bits    Pin
 01
 02
 03
-04      02
-05      03
-06      04
-07      33
-08      05
+04      02  CP Data 0
+05      03  CP Data 1
+06      04  CP Data 2
+07      33  CP Data 3
+08      05  CP Clock
 09
 10
 11
@@ -142,5 +144,5 @@ Bits    Pin
 28
 29
 30
-31      29
+31      29  CP Acknowledge signal
 

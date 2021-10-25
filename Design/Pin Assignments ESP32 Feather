@@ -1,0 +1,65 @@
+Communication Protocol = CP
+
+Pin 04 A5   CP Acknowledge Signal
+Pin 05      CP Clock
+
+Pin 12      Display bit 0
+Pin 13      Display bit 1
+Pin 14      Display bit 2
+Pin 15      Display bit 3
+Pin 16      Display bit 4
+Pin 17      Display bit 5
+Pin 18      Display bit 6
+Pin 19      Display bit 7
+
+Pin 21
+Pin 22
+Pin 23
+
+Pin 25 A1
+Pin 26 A0
+Pin 27
+
+Pin 32      CP Data 0
+Pin 33      CP Data 1
+Pin 34 A2   CP Data 2
+
+Pin 36 A4   CP Data 3
+
+Pin 39 A3
+
+Display needs
+RESX / RST to reset display
+CSX / CS may or may not be required
+D/CX / D/C to select data or command
+RDX / RD read data on rising edge
+WRX / WR write data on rising edge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
