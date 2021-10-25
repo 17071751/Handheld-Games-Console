@@ -1,0 +1,21 @@
+The communication protocol will be made from several components:
+1 Clock signal triggered by the Teensy 4.1 to indicate that the data on the bus is a valid command/valid data. The clock is trigger on high
+1 Acknowledge signal triggered by the ESP32 to indicate that it has completed the requested process. The acknowledge signal is trigger on high
+4 Bi-directional Data lines to transfer data between the microcontrollers
+
+To read data the command will be sent as usual and then the EPS32 will assert the data to be read on the bus and trigger the acknowledge signal then the Teensy 4.1 will switch the bus to read and read the value. When the next command/data is sent the ESP32 will switch to reading the bus upon reading the clock signal.
+
+The commands will be 4 bits in length
+The commands will be:
+0000 - No Command
+0001 - Set Tile position
+0010 - Read Tile position
+0011 - Set Tile Data
+0100 - Read Tile Data
+0101 - Set Sprite Data
+0110 - Read Sprite Data
+0111 - Interact with Sprites on sprite layer
+1000 - Reserved
+1101 - Reserved
+1110 - Reserved
+1111 - Reserved
