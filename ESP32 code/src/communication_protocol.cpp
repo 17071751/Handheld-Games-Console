@@ -55,7 +55,9 @@ void CommunicationProtocol::process_set_tile_position() {
                     this->active_instruction = ActiveInstruction::Waiting; break;
                 }
 
+                // Set tile id on UI tile map
                 TileMapUI::tileMap->tiles[set_tile_data->y * 40 + set_tile_data->x] = set_tile_data->tile_id;
+                Serial.printf("Set tile at x: %d, y: %d to id: %d", set_tile_data->x, set_tile_data->y, set_tile_data->tile_id);
             } else {
                 // Verify that position is valid
                 if (set_tile_data->x >= 45 || set_tile_data-> y >= 35) {
@@ -64,7 +66,9 @@ void CommunicationProtocol::process_set_tile_position() {
                     this->active_instruction = ActiveInstruction::Waiting; break;
                 }
 
-                TileMapUI::tileMap->tiles[set_tile_data->y * 45 + set_tile_data->x] = set_tile_data->tile_id;
+                // Set tile id on UI tile map
+                TileMapMain::tileMap->tiles[set_tile_data->y * 45 + set_tile_data->x] = set_tile_data->tile_id;
+                Serial.printf("Set tile at x: %d, y: %d to id: %d", set_tile_data->x, set_tile_data->y, set_tile_data->tile_id);
             }
             // Reset instuction to wait for next instruction
             this->active_instruction = ActiveInstruction::Waiting; break;
