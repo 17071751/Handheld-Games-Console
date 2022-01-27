@@ -9,6 +9,10 @@ void clock_interrupt() {
 }
 
 void setup() {
+  Serial.begin(9600);
+  while(!Serial) {}
+
+  Serial.println("\nInitialising");
   Tile::initialise();
   TileMapMain::initilise();
   TileMapUI::initilise();

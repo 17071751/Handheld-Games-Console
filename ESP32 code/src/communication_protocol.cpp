@@ -27,16 +27,19 @@ void CommunicationProtocol::process_set_tile_position() {
     switch (set_tile_data->stage) {
         // Stage 0: choose map
         case 0: set_tile_data->ui_map = this->data; ++set_tile_data->stage; break;
+        Serial.printf("ui map state: %d", set_tile_data->ui_map);
 
         // Stage 1: choose first 4 bits of x
         case 1: set_tile_data->x = this->data; ++set_tile_data->stage; break;
         // Stage 2: choose second 4 bits of x
         case 2: set_tile_data->x |= this->data << 4; ++set_tile_data->stage; break;
+        Serial.printf("x state: %d", set_tile_data->x);
 
         // Stage 3: choose first 4 bits of y
         case 3: set_tile_data->y = this->data; ++set_tile_data->stage; break;
         // Stage 4: choose second 4 bits of y
         case 4: set_tile_data->y |= this->data << 4; ++set_tile_data->stage; break;
+        Serial.printf("y state: %d", set_tile_data->y);
 
         // Stage 5: choose first 4 bits of tile ID
         case 5: set_tile_data->tile_id = this->data; ++set_tile_data->stage; break;
@@ -47,6 +50,7 @@ void CommunicationProtocol::process_set_tile_position() {
         // Stage 8: choose forth 4 bits of tile ID and set chosen value
         case 8:
             set_tile_data->tile_id |= (uint16_t)(this->data) << 12;
+            Serial.printf("tile_id state: %d", set_tile_data->tile_id);
             if (set_tile_data->ui_map) {
                 // Verify that position is valid
                 if (set_tile_data->x >= 40 || set_tile_data->y >= 30) {
@@ -86,6 +90,7 @@ void CommunicationProtocol::process_instruction() {
         case ActiveInstruction::SetTilePostition: process_set_tile_position(); break;
     }
     this->acknowledge_state = !this->acknowledge_state;
+    Serial.println("Acknowledge");
     digitalWrite(ACKNOWLEDGE_PIN, this->acknowledge_state);
 }
 
