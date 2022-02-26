@@ -49,50 +49,52 @@ void testSetTilePosition() {
   Serial.println("select \"Set Tile position\"");
   acknowledge = false;
   writeMessage(1);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   // Write to tile map
   Serial.println("Write to tile map");
   acknowledge = false;
   writeMessage(0);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   // Write x of 140
   Serial.println("Write x of 140 part 1");
   acknowledge = false;
   writeMessage(140 & 0xF);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   Serial.println("Write x of 140 part 2");
   acknowledge = false;
   writeMessage(140 >> 4);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   // Write y of 165
   Serial.println("Write y of 165 part 1");
   acknowledge = false;
   writeMessage(165 & 0xF);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   Serial.println("Write y of 165 part 2");
   acknowledge = false;
   writeMessage(165 >> 4);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   // Write tile ID of 36
   Serial.println("Write tile ID of 36 part 1");
   acknowledge = false;
   writeMessage(36 & 0xF);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   Serial.println("Write tile ID of 36 part 2");
   acknowledge = false;
   writeMessage(36 >> 4);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   Serial.println("Write tile ID of 36 part 3");
   acknowledge = false;
   writeMessage(0);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
   Serial.println("Write tile ID of 36 part 4");
   acknowledge = false;
   writeMessage(0);
-  while (!acknowledge) {}
+  while (!acknowledge) {delay(1);}
 }
 
 void setup() {
+
+  delay(5000);
   Serial.begin(9600);
   while(!Serial) {}
   Serial.println("Serial test");
