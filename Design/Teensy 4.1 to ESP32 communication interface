@@ -9,13 +9,24 @@ The commands will be 4 bits in length
 The commands will be:
 0000 - No Command
 0001 - Set Tile position
-0010 - Read Tile position
-0011 - Set Tile Data
+0010 - Set Tile Data
+0011 - Set Sprite Data
 0100 - Read Tile Data
-0101 - Set Sprite Data
-0110 - Read Sprite Data
-0111 - Interact with Sprites on sprite layer
+0101 - Interact with Sprites on sprite layer
+0110 - Reserved
+0111 - Reserved
 1000 - Reserved
 1101 - Reserved
 1110 - Reserved
 1111 - Reserved
+
+Set tile position:
+0: message to choose with map (0 for main map, 1 for UI map)
+1: message for first 4 bits of x
+2: message for second 4 bits of x
+3: message for first 4 bits of y
+4: message for second 4 bits of y
+5: message for first 4 bits of tile ID
+6: message for second 4 bits of tile ID
+7: message for third 4 bits of tile ID
+8: message for forth 4 bits of tile ID

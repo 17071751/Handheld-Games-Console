@@ -55,23 +55,23 @@ void testSetTilePosition() {
   acknowledge = false;
   writeMessage(0);
   while (!acknowledge) {delay(1);}
-  // Write x of 140
-  Serial.println("Write x of 140 part 1");
+  // Write x of 26
+  Serial.println("Write x of 26 part 1");
   acknowledge = false;
-  writeMessage(140 & 0xF);
+  writeMessage(26 & 0xF);
   while (!acknowledge) {delay(1);}
-  Serial.println("Write x of 140 part 2");
+  Serial.println("Write x of 26 part 2");
   acknowledge = false;
-  writeMessage(140 >> 4);
+  writeMessage(26 >> 4);
   while (!acknowledge) {delay(1);}
-  // Write y of 165
-  Serial.println("Write y of 165 part 1");
+  // Write y of 17
+  Serial.println("Write y of 17 part 1");
   acknowledge = false;
-  writeMessage(165 & 0xF);
+  writeMessage(17 & 0xF);
   while (!acknowledge) {delay(1);}
-  Serial.println("Write y of 165 part 2");
+  Serial.println("Write y of 17 part 2");
   acknowledge = false;
-  writeMessage(165 >> 4);
+  writeMessage(17 >> 4);
   while (!acknowledge) {delay(1);}
   // Write tile ID of 36
   Serial.println("Write tile ID of 36 part 1");
