@@ -1,3 +1,6 @@
+#ifndef TILEMAP_H
+#define TILEMAP_H
+
 #include "tile.h"
 
 struct TileMapMain {
@@ -17,3 +20,5 @@ struct TileMapUI {
 
     static void initilise();
 };
+
+#endif

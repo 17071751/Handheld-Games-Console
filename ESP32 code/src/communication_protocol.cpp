@@ -17,6 +17,11 @@ void CommunicationProtocol::read_instruction() {
             this->active_instruction_data.set_tile_postion_data = SetTilePositionData();
             break;
         }
+        case B0010: {
+            this->active_instruction = ActiveInstruction::SetTileData;
+            this->active_instruction_data.set_tile_data_data = SetTileDataData();
+            break;
+        }
         default: {
             this->active_instruction = ActiveInstruction::Waiting;
             break;
@@ -85,11 +90,47 @@ void CommunicationProtocol::process_set_tile_position() {
     }
 }
 
+void CommunicationProtocol::process_set_tile_data() {
+    SetTileDataData* set_tile_data = &this->active_instruction_data.set_tile_data_data;
+    switch (set_tile_data->stage) {
+        // Stage 0: choose first 4 bits of tile ID
+        case 0: set_tile_data->tile_id = this->data; ++set_tile_data->stage; break;
+        // Stage 1: choose second 4 bits of tile ID
+        case 1: set_tile_data->tile_id |= this->data << 4; ++set_tile_data->stage; break;
+        // Stage 2: choose third 4 bits of tile ID
+        case 2: set_tile_data->tile_id |= this->data << 8; ++set_tile_data->stage; break;
+        // Stage 3: choose forth 4 bits of tile ID
+        case 3: set_tile_data->tile_id |= this->data << 12; ++set_tile_data->stage; break;
+        // Stage 4-69: choose pixels
+        default: {
+            int i = set_tile_data->stage - 4;
+            switch (i % 4) {
+                // Stage i*4: choose first 4 bits of pixel
+                case 0: set_tile_data->tile.pixels[i] = this->data; ++set_tile_data->stage; break;
+                // Stage i*4+1: choose second 4 bits of pixel
+                case 1: set_tile_data->tile.pixels[i] |= this->data << 4; ++set_tile_data->stage; break;
+                // Stage i*4+2: choose third 4 bits of pixel
+                case 2: set_tile_data->tile.pixels[i] |= this->data << 8; ++set_tile_data->stage; break;
+                // Stage i*4+3: choose forth 4 bits of pixel
+                case 3: set_tile_data->tile.pixels[i] |= this->data << 12; ++set_tile_data->stage; break;
+            }
+            // If all pixels read set tile
+            if (i == 63) {
+                Tile::tiles[set_tile_data->tile_id] = set_tile_data->tile;
+                
+                this->active_instruction = ActiveInstruction::Waiting;
+            }
+            break;
+        }
+    }
+}
+
 void CommunicationProtocol::process_instruction() {
     this->data = read_data();
     switch (this->active_instruction) {
         case ActiveInstruction::Waiting: read_instruction(); break;
         case ActiveInstruction::SetTilePostition: process_set_tile_position(); break;
+        case ActiveInstruction::SetTileData: process_set_tile_data(); break;
     }
     this->acknowledge_state = !this->acknowledge_state;
     Serial.printf("Acknowledge %d%d%d%d\n", ((this->data >> 3) & 1),
