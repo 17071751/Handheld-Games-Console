@@ -2,12 +2,15 @@
 #include "tilemap.h"
 #include <stdint.h>
 
+uint8_t acknowledge_state = 0;
+
 uint8_t read_data() {
     //uint8_t data = (uint8_t)REG_READ(GPIO_IN1_REG);
 
     //return (data & B111) | ((data >> 1) & B1000);
+    uint8_t val = (digitalRead(36) << 3) | (digitalRead(34) << 2) | (digitalRead(33) << 1) | digitalRead(32);
 
-    return (digitalRead(36) << 3) | (digitalRead(34) << 2) | (digitalRead(33) << 1) | digitalRead(32);
+    return val;
 }
 
 void CommunicationProtocol::read_instruction() {
@@ -94,29 +97,42 @@ void CommunicationProtocol::process_set_tile_data() {
     SetTileDataData* set_tile_data = &this->active_instruction_data.set_tile_data_data;
     switch (set_tile_data->stage) {
         // Stage 0: choose first 4 bits of tile ID
-        case 0: set_tile_data->tile_id = this->data; ++set_tile_data->stage; break;
+        case 0: set_tile_data->tile_id = this->data; ++set_tile_data->stage; Serial.println("id0"); break;
         // Stage 1: choose second 4 bits of tile ID
-        case 1: set_tile_data->tile_id |= this->data << 4; ++set_tile_data->stage; break;
+        case 1: set_tile_data->tile_id |= this->data << 4; ++set_tile_data->stage; Serial.println("id1"); break;
         // Stage 2: choose third 4 bits of tile ID
-        case 2: set_tile_data->tile_id |= this->data << 8; ++set_tile_data->stage; break;
+        case 2: set_tile_data->tile_id |= this->data << 8; ++set_tile_data->stage; Serial.println("id2"); break;
         // Stage 3: choose forth 4 bits of tile ID
-        case 3: set_tile_data->tile_id |= this->data << 12; ++set_tile_data->stage; break;
+        case 3: set_tile_data->tile_id |= this->data << 12; ++set_tile_data->stage; Serial.println("id3"); break;
         // Stage 4-69: choose pixels
         default: {
             int i = set_tile_data->stage - 4;
-            switch (i % 4) {
+            int current_pixel = i/4;
+            int pixel_stage = i%4;
+            Serial.printf("current_pixel: %d, pixel_stage: %d\n", current_pixel, pixel_stage);
+            switch (pixel_stage) {
                 // Stage i*4: choose first 4 bits of pixel
-                case 0: set_tile_data->tile.pixels[i] = this->data; ++set_tile_data->stage; break;
+                case 0: set_tile_data->tile.pixels[current_pixel] = this->data; ++set_tile_data->stage; break;
                 // Stage i*4+1: choose second 4 bits of pixel
-                case 1: set_tile_data->tile.pixels[i] |= this->data << 4; ++set_tile_data->stage; break;
+                case 1: set_tile_data->tile.pixels[current_pixel] |= this->data << 4; ++set_tile_data->stage; break;
                 // Stage i*4+2: choose third 4 bits of pixel
-                case 2: set_tile_data->tile.pixels[i] |= this->data << 8; ++set_tile_data->stage; break;
+                case 2: set_tile_data->tile.pixels[current_pixel] |= this->data << 8; ++set_tile_data->stage; break;
                 // Stage i*4+3: choose forth 4 bits of pixel
-                case 3: set_tile_data->tile.pixels[i] |= this->data << 12; ++set_tile_data->stage; break;
+                case 3: set_tile_data->tile.pixels[current_pixel] |= this->data << 12; ++set_tile_data->stage; break;
             }
             // If all pixels read set tile
-            if (i == 63) {
+            if (current_pixel == 63 && pixel_stage == 3) {
                 Tile::tiles[set_tile_data->tile_id] = set_tile_data->tile;
+
+                Serial.printf("Tile ID: %d\nTile data: {\n", set_tile_data->tile_id);
+                for (int y = 5; y < 8; ++y) { // Cannot print all values as the interrupt will crash due to taking too long
+                    for (int x = 0; x < 8; ++x) {
+                        Serial.printf("%d, ", Tile::tiles[set_tile_data->tile_id].pixels[y*8+x]);
+                        //Serial.printf("0, ");
+                    }
+                    Serial.println();
+                }
+                Serial.println("}");
                 
                 this->active_instruction = ActiveInstruction::Waiting;
             }
@@ -125,17 +141,26 @@ void CommunicationProtocol::process_set_tile_data() {
     }
 }
 
+char* active_instruction_debug(ActiveInstruction active_instruction) {
+    switch (active_instruction) {
+        case ActiveInstruction::Waiting: return "Waiting";
+        case ActiveInstruction::SetTilePostition: return "SetTilePostition";
+        case ActiveInstruction::SetTileData: return "SetTileData";
+    }
+}
+
 void CommunicationProtocol::process_instruction() {
     this->data = read_data();
+    Serial.printf("Recieved %d%d%d%d Active instruction:%s\n", ((this->data >> 3) & 1),
+     ((this->data >> 2) & 1), ((this->data >> 1) & 1), (this->data & 1), active_instruction_debug(this->active_instruction));
+
     switch (this->active_instruction) {
         case ActiveInstruction::Waiting: read_instruction(); break;
         case ActiveInstruction::SetTilePostition: process_set_tile_position(); break;
         case ActiveInstruction::SetTileData: process_set_tile_data(); break;
     }
-    this->acknowledge_state = !this->acknowledge_state;
-    Serial.printf("Acknowledge %d%d%d%d\n", ((this->data >> 3) & 1),
-     ((this->data >> 2) & 1), ((this->data >> 1) & 1), (this->data & 1));
-    digitalWrite(ACKNOWLEDGE_PIN, this->acknowledge_state);
+    acknowledge_state = 1 - acknowledge_state;
+    digitalWrite(ACKNOWLEDGE_PIN, acknowledge_state);
 }
 
 

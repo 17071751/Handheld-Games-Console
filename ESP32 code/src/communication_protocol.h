@@ -12,10 +12,10 @@
 #define ACKNOWLEDGE_PIN 4
 
 
-
 enum class ActiveInstruction {
     Waiting, SetTilePostition, SetTileData
 };
+
 
 struct SetTilePositionData {
     uint16_t tile_id;
@@ -27,7 +27,7 @@ struct SetTilePositionData {
 
 struct SetTileDataData {
     uint16_t tile_id;
-    uint8_t stage = 0;
+    uint16_t stage = 0;
     Tile tile;
 };
 
@@ -39,17 +39,16 @@ union ActiveInstructionData {
 };
 
 class CommunicationProtocol {
+    uint8_t data;
     ActiveInstruction active_instruction;
     ActiveInstructionData active_instruction_data;
-    bool acknowledge_state;
-    uint8_t data;
 
     void read_instruction();
     void process_set_tile_position();
     void process_set_tile_data();
 
 public:
-    CommunicationProtocol() : active_instruction(ActiveInstruction::Waiting), acknowledge_state(LOW) {}
+    CommunicationProtocol() : active_instruction(ActiveInstruction::Waiting) {}
     void process_instruction();
 };
 
