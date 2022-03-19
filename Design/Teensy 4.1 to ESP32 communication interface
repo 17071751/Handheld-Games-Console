@@ -11,8 +11,8 @@ The commands will be:
 0001 - Set Tile position
 0010 - Set Tile Data
 0011 - Set Sprite Data
-0100 - Read Tile Data
-0101 - Interact with Sprites on sprite layer
+0100 - Move Sprite
+0101 - Reserved
 0110 - Reserved
 0111 - Reserved
 1000 - Reserved

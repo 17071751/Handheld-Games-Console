@@ -114,6 +114,31 @@ void testSetTileData() {
   }
 }
 
+void testSetSpriteData() {
+  // select "Set Sprite data"
+  Serial.println("select \"Set Sprite data\"");
+  writeMessage(3);
+  // Write sprite ID of 36
+  Serial.println("Write sprite ID of 36 part 1");
+  writeMessage(36 & 0xF);
+  Serial.println("Write sprite ID of 36 part 2");
+  writeMessage(36 >> 4);
+
+  // Write pixels
+  Serial.println("Writing pixels");
+  for (int i = 0; i < 64; ++i) {
+    // Write pixel
+    Serial.printf("Write pixel %d part 1\n", i);
+    writeMessage(test_pixels[i] & 0xF);
+    Serial.println("Write pixel part 2");
+    writeMessage((test_pixels[i] >> 4) & 0xF);
+    Serial.println("Write pixel part 3");
+    writeMessage((test_pixels[i] >> 8) & 0xF);
+    Serial.println("Write pixel part 4");
+    writeMessage((test_pixels[i] >> 12) & 0xF);
+  }
+}
+
 void setup() {
 
   delay(5000);
@@ -132,7 +157,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(CP_ACKNOWLEDGE), acknowledged, CHANGE);
 
   //testSetTilePosition();
-  testSetTileData();
+  //testSetTileData();
+  testSetSpriteData();
 }
 
 void loop() {

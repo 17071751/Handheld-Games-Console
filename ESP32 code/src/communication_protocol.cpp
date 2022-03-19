@@ -13,16 +13,32 @@ uint8_t read_data() {
     return val;
 }
 
+const char* active_instruction_debug(ActiveInstruction active_instruction) {
+    switch (active_instruction) {
+        case ActiveInstruction::Waiting: return "Waiting";
+        case ActiveInstruction::SetTilePostition: return "SetTilePostition";
+        case ActiveInstruction::SetTileData: return "SetTileData";
+        case ActiveInstruction::SetSpriteData: return "SetSpriteData";
+        default: return "Unknown Instruction";
+    }
+}
+
 void CommunicationProtocol::read_instruction() {
+    Serial.printf("Instruction: %d read\n", this->data);
     switch (this->data) {
-        case B0001: {
+        case 1: {
             this->active_instruction = ActiveInstruction::SetTilePostition;
             this->active_instruction_data.set_tile_postion_data = SetTilePositionData();
             break;
         }
-        case B0010: {
+        case 2: {
             this->active_instruction = ActiveInstruction::SetTileData;
             this->active_instruction_data.set_tile_data_data = SetTileDataData();
+            break;
+        }
+        case 3: {
+            this->active_instruction = ActiveInstruction::SetSpriteData;
+            this->active_instruction_data.set_sprite_data_data = SetSpriteDataData();
             break;
         }
         default: {
@@ -30,6 +46,7 @@ void CommunicationProtocol::read_instruction() {
             break;
         }
     }
+    Serial.printf("Active instruction read: %s\n", active_instruction_debug(this->active_instruction));
 }
 
 void CommunicationProtocol::process_set_tile_position() {
@@ -141,11 +158,51 @@ void CommunicationProtocol::process_set_tile_data() {
     }
 }
 
-char* active_instruction_debug(ActiveInstruction active_instruction) {
-    switch (active_instruction) {
-        case ActiveInstruction::Waiting: return "Waiting";
-        case ActiveInstruction::SetTilePostition: return "SetTilePostition";
-        case ActiveInstruction::SetTileData: return "SetTileData";
+void CommunicationProtocol::process_set_sprite_data() {
+    SetSpriteDataData* set_sprite_data = &this->active_instruction_data.set_sprite_data_data;
+    switch (set_sprite_data->stage) {
+        // Stage 0: choose first 4 bits of sprite ID
+        case 0: set_sprite_data->sprite_id = this->data; ++set_sprite_data->stage; break;
+        // Stage 1: choose second 4 bits of sprite ID
+        case 1: set_sprite_data->sprite_id |= this->data << 4; ++set_sprite_data->stage; break;
+        
+        // Stage 2-67: choose pixels
+        default: {
+            int i = set_sprite_data->stage - 2;
+            int current_pixel = i/4;
+            int pixel_stage = i%4;
+            Serial.printf("current_pixel: %d, pixel_stage: %d\n", current_pixel, pixel_stage);
+            switch (pixel_stage) {
+                // Stage i*4: choose first 4 bits of pixel
+                case 0: set_sprite_data->pixels[current_pixel] = this->data; ++set_sprite_data->stage; break;
+                // Stage i*4+1: choose second 4 bits of pixel
+                case 1: set_sprite_data->pixels[current_pixel] |= this->data << 4; ++set_sprite_data->stage; break;
+                // Stage i*4+2: choose third 4 bits of pixel
+                case 2: set_sprite_data->pixels[current_pixel] |= this->data << 8; ++set_sprite_data->stage; break;
+                // Stage i*4+3: choose forth 4 bits of pixel
+                case 3: set_sprite_data->pixels[current_pixel] |= this->data << 12; ++set_sprite_data->stage; break;
+            }
+            // If all pixels read set sprite
+            if (current_pixel == 63 && pixel_stage == 3) {
+                // Copy pixel array across
+                Sprite* sprite = &Sprite::sprites[set_sprite_data->sprite_id];
+                for (int j = 0; j < 64; ++j) {
+                    sprite->pixels[j] = set_sprite_data->pixels[j];
+                }
+
+                Serial.printf("Sprite ID: %d\nSprite data: {\n", set_sprite_data->sprite_id);
+                for (int y = 5; y < 8; ++y) { // Cannot print all values as the interrupt will crash due to taking too long
+                    for (int x = 0; x < 8; ++x) {
+                        Serial.printf("%d, ", Sprite::sprites[set_sprite_data->sprite_id].pixels[y*8+x]);
+                    }
+                    Serial.println();
+                }
+                Serial.println("}");
+                
+                this->active_instruction = ActiveInstruction::Waiting;
+            }
+            break;
+        }
     }
 }
 
@@ -158,6 +215,7 @@ void CommunicationProtocol::process_instruction() {
         case ActiveInstruction::Waiting: read_instruction(); break;
         case ActiveInstruction::SetTilePostition: process_set_tile_position(); break;
         case ActiveInstruction::SetTileData: process_set_tile_data(); break;
+        case ActiveInstruction::SetSpriteData: process_set_sprite_data(); break;
     }
     acknowledge_state = 1 - acknowledge_state;
     digitalWrite(ACKNOWLEDGE_PIN, acknowledge_state);

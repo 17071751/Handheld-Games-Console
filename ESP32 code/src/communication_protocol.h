@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "tile.h"
+#include "sprite.h"
 
 #define DATA0_PIN 32
 #define DATA1_PIN 33
@@ -13,7 +14,7 @@
 
 
 enum class ActiveInstruction {
-    Waiting, SetTilePostition, SetTileData
+    Waiting, SetTilePostition, SetTileData, SetSpriteData
 };
 
 
@@ -31,10 +32,17 @@ struct SetTileDataData {
     Tile tile;
 };
 
+struct SetSpriteDataData {
+    uint8_t sprite_id;
+    uint16_t stage = 0;
+    uint16_t pixels[64];
+};
+
 union ActiveInstructionData {
     int none;
     SetTilePositionData set_tile_postion_data;
     SetTileDataData set_tile_data_data;
+    SetSpriteDataData set_sprite_data_data;
     ActiveInstructionData() {}
 };
 
@@ -46,6 +54,7 @@ class CommunicationProtocol {
     void read_instruction();
     void process_set_tile_position();
     void process_set_tile_data();
+    void process_set_sprite_data();
 
 public:
     CommunicationProtocol() : active_instruction(ActiveInstruction::Waiting) {}

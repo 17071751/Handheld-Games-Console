@@ -1,5 +1,7 @@
-Each tile will be 8x8 pixels where each pixel will be a 16 bit/2 byte colour resulting in each pixel taking up 128 bytes of ram. There will be 1200 different possible tiles and they will occupy the 153.6KB of ram from 0x3FFD_A800-0x3FFF_FFFF
+Each tile will be 8x8 pixels where each pixel will be a 16 bit/2 byte colour resulting in each tile taking up 128 bytes of ram. There will be 1200 different possible tiles and they will occupy the 153.6KB of ram from 0x3FFD_A800-0x3FFF_FFFF
 
 The background tile map will have a resolution of 45x35 to allow some space for scrolling. Each tile will be defined by a 16 bit/2 byte integer resulting in the tile map taking up 3.15KB of ram. A tile value of 0 will show up as all black.The tile map will be located at 0x3FFD_9252-0x3FFD_9E9F
 
 The UI tile map will have a resolution of 40x30. Each tile will be defined by a 16 bit/2 byte integer resulting in the tile map taking up 2.4KB of ram. A tile value of 0 will not show up allowing the layers below to show. The tile map will be located at 0x3FFD_9EA0-0x0x3FFD_A7FF
+
+Each sprite will be 8x8 pixels where each pixel will be a 16 bit/2 byte colour. They will also consist of 4 bytes of position data which will be reused as an enable flag resulting in each sprite taking up 132 bytes of ram. There will be 64 different possible sprites and they will occupy the 8.448KB of ram from 0x3FFD_7D9E-0x3FFD_9E9F
