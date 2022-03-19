@@ -41,8 +41,8 @@ struct SetSpriteDataData {
 struct SetSpritePositionData {
     uint8_t sprite_id;
     uint8_t stage = 0;
-    uint16_t x;
-    uint16_t y;
+    int16_t x;
+    int16_t y;
 };
 
 union ActiveInstructionData {

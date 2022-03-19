@@ -12,13 +12,13 @@ Pin 17      Display bit 5
 Pin 18      Display bit 6
 Pin 19      Display bit 7
 
-Pin 21
-Pin 22
-Pin 23
+Pin 21      D/CX
+Pin 22      RDX
+Pin 23      WRX
 
 Pin 25 A1
 Pin 26 A0
-Pin 27
+Pin 27      RST
 
 Pin 32      CP Data 0
 Pin 33      CP Data 1
@@ -35,6 +35,7 @@ D/CX / D/C to select data or command
 RDX / RD read data on rising edge
 WRX / WR write data on rising edge
 
+Display uses 80 MCU 8-bit bus interface I
 
 
 
