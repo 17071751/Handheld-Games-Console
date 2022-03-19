@@ -139,6 +139,35 @@ void testSetSpriteData() {
   }
 }
 
+void testSetSpritePosition() {
+  // select "Set Tile position"
+  Serial.println("select \"Set Sprite position\"");
+  writeMessage(4);
+  // Write sprite ID of 36
+  Serial.println("Write sprite ID of 36 part 1");
+  writeMessage(36 & 0xF);
+  Serial.println("Write sprite ID of 36 part 2");
+  writeMessage(36 >> 4);
+  // Write x of 26
+  Serial.println("Write x of 26 part 1");
+  writeMessage(26 & 0xF);
+  Serial.println("Write x of 26 part 2");
+  writeMessage(26 >> 4);
+  Serial.println("Write x of 26 part 3");
+  writeMessage(0);
+  Serial.println("Write x of 26 part 4");
+  writeMessage(0);
+  // Write y of 17
+  Serial.println("Write y of 17 part 1");
+  writeMessage(17 & 0xF);
+  Serial.println("Write y of 17 part 2");
+  writeMessage(17 >> 4);
+  Serial.println("Write y of 17 part 3");
+  writeMessage(0);
+  Serial.println("Write y of 17 part 4");
+  writeMessage(0);
+}
+
 void setup() {
 
   delay(5000);
@@ -158,7 +187,8 @@ void setup() {
 
   //testSetTilePosition();
   //testSetTileData();
-  testSetSpriteData();
+  //testSetSpriteData();
+  testSetSpritePosition();
 }
 
 void loop() {

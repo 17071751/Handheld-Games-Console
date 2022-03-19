@@ -19,6 +19,7 @@ const char* active_instruction_debug(ActiveInstruction active_instruction) {
         case ActiveInstruction::SetTilePostition: return "SetTilePostition";
         case ActiveInstruction::SetTileData: return "SetTileData";
         case ActiveInstruction::SetSpriteData: return "SetSpriteData";
+        case ActiveInstruction::SetSpritePosition: return "SetSpritePosition";
         default: return "Unknown Instruction";
     }
 }
@@ -39,6 +40,11 @@ void CommunicationProtocol::read_instruction() {
         case 3: {
             this->active_instruction = ActiveInstruction::SetSpriteData;
             this->active_instruction_data.set_sprite_data_data = SetSpriteDataData();
+            break;
+        }
+        case 4: {
+            this->active_instruction = ActiveInstruction::SetSpritePosition;
+            this-> active_instruction_data.set_sprite_position_data = SetSpritePositionData();
             break;
         }
         default: {
@@ -206,6 +212,43 @@ void CommunicationProtocol::process_set_sprite_data() {
     }
 }
 
+void CommunicationProtocol::process_set_sprite_position() {
+    SetSpritePositionData* set_sprite_data = &this->active_instruction_data.set_sprite_position_data;
+    switch (set_sprite_data->stage) {
+        // Stage 0: choose first 4 bits of sprite ID
+        case 0: set_sprite_data->sprite_id = this->data; ++set_sprite_data->stage; break;
+        // Stage 1: choose second 4 bits of sprite ID
+        case 1: set_sprite_data->sprite_id |= this->data << 4; ++set_sprite_data->stage; break;
+
+        // Stage 2: choose first 4 bits of the x position
+        case 2: set_sprite_data->x = this->data; ++set_sprite_data->stage; break;
+        // Stage 3: choose second 4 bits of x position
+        case 3: set_sprite_data->x |= this->data << 4; ++set_sprite_data->stage; break;
+        // Stage 4: choose third 4 bits of x position
+        case 4: set_sprite_data->x |= this->data << 8; ++set_sprite_data->stage; break;
+        // Stage 5: choose forth 4 bits of x position
+        case 5: set_sprite_data->x |= this->data << 12; ++set_sprite_data->stage; break;
+
+        // Stage 6: choose first 4 bits of the y position
+        case 6: set_sprite_data->y = this->data; ++set_sprite_data->stage; break;
+        // Stage 7: choose second 4 bits of y position
+        case 7: set_sprite_data->y |= this->data << 4; ++set_sprite_data->stage; break;
+        // Stage 8: choose third 4 bits of y position
+        case 8: set_sprite_data->y |= this->data << 8; ++set_sprite_data->stage; break;
+        // Stage 9: choose forth 4 bits of y position
+        case 9: {
+            set_sprite_data->y |= this->data << 12; ++set_sprite_data->stage;
+            
+            Sprite::sprites[set_sprite_data->sprite_id].x = set_sprite_data->x;
+            Sprite::sprites[set_sprite_data->sprite_id].y = set_sprite_data->y;
+
+            Serial.printf("Moved sprite to x: %d, y: %d to id: %d\n", set_sprite_data->x, set_sprite_data->y, set_sprite_data->sprite_id);
+            
+            this->active_instruction = ActiveInstruction::Waiting; break;
+        }
+    }
+}
+
 void CommunicationProtocol::process_instruction() {
     this->data = read_data();
     Serial.printf("Recieved %d%d%d%d Active instruction:%s\n", ((this->data >> 3) & 1),
@@ -216,6 +259,7 @@ void CommunicationProtocol::process_instruction() {
         case ActiveInstruction::SetTilePostition: process_set_tile_position(); break;
         case ActiveInstruction::SetTileData: process_set_tile_data(); break;
         case ActiveInstruction::SetSpriteData: process_set_sprite_data(); break;
+        case ActiveInstruction::SetSpritePosition: process_set_sprite_position(); break;
     }
     acknowledge_state = 1 - acknowledge_state;
     digitalWrite(ACKNOWLEDGE_PIN, acknowledge_state);

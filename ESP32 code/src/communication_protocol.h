@@ -14,7 +14,7 @@
 
 
 enum class ActiveInstruction {
-    Waiting, SetTilePostition, SetTileData, SetSpriteData
+    Waiting, SetTilePostition, SetTileData, SetSpriteData, SetSpritePosition
 };
 
 
@@ -38,11 +38,18 @@ struct SetSpriteDataData {
     uint16_t pixels[64];
 };
 
+struct SetSpritePositionData {
+    uint8_t sprite_id;
+    uint8_t stage = 0;
+    uint16_t x;
+    uint16_t y;
+};
+
 union ActiveInstructionData {
-    int none;
     SetTilePositionData set_tile_postion_data;
     SetTileDataData set_tile_data_data;
     SetSpriteDataData set_sprite_data_data;
+    SetSpritePositionData set_sprite_position_data;
     ActiveInstructionData() {}
 };
 
@@ -55,6 +62,7 @@ class CommunicationProtocol {
     void process_set_tile_position();
     void process_set_tile_data();
     void process_set_sprite_data();
+    void process_set_sprite_position();
 
 public:
     CommunicationProtocol() : active_instruction(ActiveInstruction::Waiting) {}
