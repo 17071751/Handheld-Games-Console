@@ -13,8 +13,8 @@ Pin 18      Display bit 6
 Pin 19      Display bit 7
 
 Pin 21      D/CX
-Pin 22      RDX
-Pin 23      WRX
+Pin 22      WRX
+Pin 23      RDX
 
 Pin 25 A1
 Pin 26 A0

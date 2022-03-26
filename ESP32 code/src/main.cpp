@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <tilemap.h>
 #include "communication_protocol.h"
+#include "screen.h"
 
 CommunicationProtocol communication_protocol = CommunicationProtocol();
 
@@ -13,7 +14,7 @@ void setup() {
   while(!Serial) {}
 
   Serial.println("\nInitialising");
-  Tile::initialise();
+  /*Tile::initialise();
   TileMapMain::initilise();
   TileMapUI::initilise();
 
@@ -24,6 +25,13 @@ void setup() {
   pinMode(CLOCK_PIN, INPUT);
   pinMode(ACKNOWLEDGE_PIN, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(CLOCK_PIN), clock_interrupt, RISING);
+
+  screen_setup();
+  //draw();*/
+  pinMode(13, OUTPUT);
+  Serial.println("Setting Pin");
+  digitalWrite(13, HIGH);
+  Serial.println("Pin, Set");
 }
 
 void loop() {
