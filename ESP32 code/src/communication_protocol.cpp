@@ -25,7 +25,6 @@ const char* active_instruction_debug(ActiveInstruction active_instruction) {
 }
 
 void CommunicationProtocol::read_instruction() {
-    Serial.printf("Instruction: %d read\n", this->data);
     switch (this->data) {
         case 1: {
             this->active_instruction = ActiveInstruction::SetTilePostition;
@@ -132,7 +131,7 @@ void CommunicationProtocol::process_set_tile_data() {
             int i = set_tile_data->stage - 4;
             int current_pixel = i/4;
             int pixel_stage = i%4;
-            Serial.printf("current_pixel: %d, pixel_stage: %d\n", current_pixel, pixel_stage);
+            //Serial.printf("current_pixel: %d, pixel_stage: %d\n", current_pixel, pixel_stage);
             switch (pixel_stage) {
                 // Stage i*4: choose first 4 bits of pixel
                 case 0: set_tile_data->tile.pixels[current_pixel] = this->data; ++set_tile_data->stage; break;
@@ -147,15 +146,7 @@ void CommunicationProtocol::process_set_tile_data() {
             if (current_pixel == 63 && pixel_stage == 3) {
                 Tile::tiles[set_tile_data->tile_id] = set_tile_data->tile;
 
-                Serial.printf("Tile ID: %d\nTile data: {\n", set_tile_data->tile_id);
-                for (int y = 5; y < 8; ++y) { // Cannot print all values as the interrupt will crash due to taking too long
-                    for (int x = 0; x < 8; ++x) {
-                        Serial.printf("%d, ", Tile::tiles[set_tile_data->tile_id].pixels[y*8+x]);
-                        //Serial.printf("0, ");
-                    }
-                    Serial.println();
-                }
-                Serial.println("}");
+                Serial.printf("Tile ID: %d\n", set_tile_data->tile_id);
                 
                 this->active_instruction = ActiveInstruction::Waiting;
             }
@@ -251,9 +242,7 @@ void CommunicationProtocol::process_set_sprite_position() {
 
 void CommunicationProtocol::process_instruction() {
     this->data = read_data();
-    Serial.printf("Recieved %d%d%d%d Active instruction:%s\n", ((this->data >> 3) & 1),
-     ((this->data >> 2) & 1), ((this->data >> 1) & 1), (this->data & 1), active_instruction_debug(this->active_instruction));
-
+    
     switch (this->active_instruction) {
         case ActiveInstruction::Waiting: read_instruction(); break;
         case ActiveInstruction::SetTilePostition: process_set_tile_position(); break;

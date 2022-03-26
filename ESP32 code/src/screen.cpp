@@ -8,14 +8,15 @@
 
 uint16_t read_pixel_colour(uint16_t x, uint16_t y) {
     
-    if (is_ui_pixel(x, y)) {
+    /*if (is_ui_pixel(x, y)) {
+        read_ui_pixel(x,y);
         return read_ui_pixel(x,y);
-    }
+    }*/
 
-    uint16_t colour = read_sprite_pixel(x, y);
+    /*uint16_t colour = read_sprite_pixel(x, y);
     if (colour != 1) {
         return colour;
-    }
+    }*/
 
     return read_background_pixel(x, y);
 }
@@ -34,6 +35,8 @@ uint16_t read_ui_pixel(uint16_t x, uint16_t y) {
     uint8_t tile_y_pos = y % 8;
 
     uint32_t tile_id = TileMapUI::tileMap->tiles[ui_y_pos * TileMapUI::WIDTH + ui_x_pos];
+
+    Serial.printf("tile_x_pos: %d, tile_y_pos: %d, tile_id: %d, index: %d\n", tile_x_pos, tile_y_pos, tile_id, ui_y_pos * TileMapUI::WIDTH + ui_x_pos);
 
     uint16_t pixel = Tile::tiles[tile_id].pixels[tile_y_pos * 8 + tile_x_pos];
 
@@ -65,7 +68,7 @@ uint16_t read_background_pixel(uint16_t x, uint16_t y) {
     uint8_t tile_x_pos = x % 8;
     uint8_t tile_y_pos = y % 8;
 
-    uint32_t tile_id = TileMapMain::tileMap->tiles[background_x_pos * TileMapUI::WIDTH + background_y_pos];
+    uint32_t tile_id = TileMapMain::tileMap->tiles[background_y_pos * TileMapMain::WIDTH + background_x_pos];
 
     uint16_t pixel = Tile::tiles[tile_id].pixels[tile_y_pos * 8 + tile_x_pos];
 
@@ -145,18 +148,30 @@ void screen_setup() {
 
 }
 
-void draw(uint16_t colour) {
-
+void draw() {
+    //read_pixel_colour(72, 119);
     command(0x2C);
 
     // Write pixels
-    Serial.println("Write pixels");
-    for (int y = 0; y < 240; ++y) {
-        for (int x = 0; x < 320; ++x) {
+    for (int x = 0; x < 320; ++x) {//320; ++x) {
+        for (int y = 0; y < 240; ++y) {//240; ++y) {
+            uint16_t colour = read_pixel_colour(x, y);
+
+            write_data(colour & 0xFF);
+            write_data(colour >> 8);
+            //write_data(0);
+            //write_data(0);
+        }
+    }
+    command(0);
+    /*// Write pixels
+    for (int x = 319; x >= 0; --x) {
+        for (int y = 239; y >= 0; --y) {
+            uint16_t colour = read_pixel_colour(x, y);
+
             write_data(colour & 0xFF);
             write_data(colour >> 8);
         }
     }
-    command(0);
-    Serial.println("Pixels written");
+    command(0);*/
 }

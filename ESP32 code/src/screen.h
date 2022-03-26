@@ -21,7 +21,7 @@ uint16_t read_background_pixel(uint16_t x, uint16_t y);
 
 void screen_setup();
 
-void draw(uint16_t colour);
+void draw();
 
 void command(uint8_t command);
 
