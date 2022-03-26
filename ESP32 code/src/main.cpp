@@ -14,7 +14,7 @@ void setup() {
   while(!Serial) {}
 
   Serial.println("\nInitialising");
-  /*Tile::initialise();
+  Tile::initialise();
   TileMapMain::initilise();
   TileMapUI::initilise();
 
@@ -27,13 +27,10 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(CLOCK_PIN), clock_interrupt, RISING);
 
   screen_setup();
-  //draw();*/
-  pinMode(13, OUTPUT);
-  Serial.println("Setting Pin");
-  digitalWrite(13, HIGH);
-  Serial.println("Pin, Set");
 }
 
 void loop() {
-
+  draw(0xF800);
+  draw(0x07E0);
+  draw(0x001F);
 }

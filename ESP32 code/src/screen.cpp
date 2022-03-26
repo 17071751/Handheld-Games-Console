@@ -73,33 +73,24 @@ uint16_t read_background_pixel(uint16_t x, uint16_t y) {
 }
 
 void write_screen_data(uint8_t data) {
-    digitalWrite(12, data & 1);
-    digitalWrite(13, (data >> 1) & 1);
-    digitalWrite(14, (data >> 2) & 1);
-    digitalWrite(15, (data >> 3) & 1);
-    digitalWrite(16, (data >> 4) & 1);
-    digitalWrite(17, (data >> 5) & 1);
-    digitalWrite(18, (data >> 6) & 1);
-    digitalWrite(19, (data >> 7) & 1);
+    REG_WRITE(GPIO_OUT_W1TC_REG, 0xFF << 12);
+    REG_WRITE(GPIO_OUT_W1TS_REG, data << 12);
 }
 
 void command(uint8_t command) {
-    digitalWrite(READ_SCREEN_DATA_PIN, HIGH);
-    digitalWrite(SCREEN_DATA_COMMAND_SELECT_PIN, LOW);
-    write_screen_data(command);
     digitalWrite(WRITE_SCREEN_DATA_PIN, LOW);
-    // Set to low to indicate command
-    // Confirm write
+    digitalWrite(SCREEN_DATA_COMMAND_SELECT_PIN, LOW);
+    delay(5);
+    write_screen_data(command);
     digitalWrite(WRITE_SCREEN_DATA_PIN, HIGH);
-    // Reset
     digitalWrite(SCREEN_DATA_COMMAND_SELECT_PIN, HIGH);
+    delay(5);
 }
 
 void write_data(uint8_t data) {
     write_screen_data(data);
     digitalWrite(WRITE_SCREEN_DATA_PIN, LOW);
     digitalWrite(WRITE_SCREEN_DATA_PIN, HIGH);
-    digitalWrite(SCREEN_DATA_COMMAND_SELECT_PIN, HIGH);
 }
 
 void screen_setup() {
@@ -116,44 +107,56 @@ void screen_setup() {
     pinMode(SCREEN_DATA_COMMAND_SELECT_PIN, OUTPUT);
     pinMode(WRITE_SCREEN_DATA_PIN, OUTPUT);
     pinMode(READ_SCREEN_DATA_PIN, OUTPUT);
+    digitalWrite(RESET_SCREEN_PIN, HIGH);
+    digitalWrite(WRITE_SCREEN_DATA_PIN, HIGH);
+    digitalWrite(READ_SCREEN_DATA_PIN, HIGH);
+    digitalWrite(SCREEN_DATA_COMMAND_SELECT_PIN, HIGH);
 
-    //write_screen_data(0xFF);
-    digitalWrite(12, 1);
-    digitalWrite(13, 1);
-    digitalWrite(14, 1);
-    digitalWrite(15, 1);
-    digitalWrite(16, 1);
-    digitalWrite(17, 1);
-    digitalWrite(18, 1);
-    digitalWrite(19, 1);
-    Serial.println("Test");
+    digitalWrite(RESET_SCREEN_PIN, LOW);
+    delay(100);
+    digitalWrite(RESET_SCREEN_PIN, HIGH);
+    delay(100);
 
-    /*command(0x2A);
+    // Set pixel format
+    command(0x3A);
+    write_data(0x55);
+
+    // Exit sleep mode
+    command(0x11);
+    delay(10);
+
+    // Display on
+    command(0x29);
+    delay(10);
+    // Normal display mode
+    command(0x13);
+
+    command(0x2A); // Set column address
     write_data(0);
-    write_data(1);// x
-    write_data(319 >> 8);
-    write_data(319 & 0xFF);// x
-
-    command(0x2B);
     write_data(0);
-    write_data(1);// y
-    write_data(239 >> 8);
-    write_data(239 & 0xFF);// y*/
+    write_data(0);
+    write_data(0xEF);
+
+    command(0x2B); // Set row address
+    write_data(0);
+    write_data(0);
+    write_data(0x1);
+    write_data(0x3F);
+
 }
 
-void draw() {
-    
+void draw(uint16_t colour) {
+
     command(0x2C);
 
     // Write pixels
     Serial.println("Write pixels");
     for (int y = 0; y < 240; ++y) {
         for (int x = 0; x < 320; ++x) {
-            write_data(B11111000);
-            write_data(0);
+            write_data(colour & 0xFF);
+            write_data(colour >> 8);
         }
     }
     command(0);
     Serial.println("Pixels written");
-
 }
